@@ -3,6 +3,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 use DI\Container;
+use App\Controller;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -21,12 +22,6 @@ AppFactory::setContainer($container);
 
 $app = AppFactory::create();
 
-$app->get("/hello/{name}", function(Request $request, Response $response, array $args = []){
-    $html = $this->get('templating')->render('hello.html', [
-        'name' => ucfirst($args['name'])
-    ]);
-    $response->getBody()->write($html);
-    return $response;
-});
+$app->get('/', 'App\Controller\IndexController:homePage');
 
 $app->run();
