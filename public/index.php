@@ -7,6 +7,8 @@ use App\Controller;
 
 require __DIR__ . '/../vendor/autoload.php';
 
+// display detailed errors for development purposes
+$development = true;
 $container = new Container();
 
 $container->set("templating", function(){
@@ -24,9 +26,19 @@ $app = AppFactory::create();
 
 //$app->get('/', 'App\Controller\IndexController:homePage');
 $app->get('/', 'App\Controller\AlbumsController:default');
-$app->get('/details/{id}', 'App\Controller\AlbumsController:details');
+$app->get('/details/{id:[0-9]+}', 'App\Controller\AlbumsController:details');
 
 $app->get('/search', 'App\Controller\AlbumsController:search');
 $app->any('/form', 'App\Controller\AlbumsController:form');
+
+$errorMiddleware = $app->addErrorMiddleware($development, true, true);
+
+$errorMiddleware->setErrorHandler(
+    Slim\Exception\HttpNotFoundException::class,
+    function(Psr\Http\Message\ServerRequestInterface $request) use ($container) {
+        $controller = new App\Controller\ExceptionController($container);
+        return $controller->notFound($request);
+    }
+);
 
 $app->run();
